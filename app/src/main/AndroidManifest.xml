@@ -13,10 +13,24 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_login"
             android:theme="@style/FullscreenTheme">
+        </activity>
+        <activity
+            android:name="com.companio.recommend.RecommendActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_recommend"
+            android:theme="@style/FullscreenTheme" />
+        <activity
+            android:name="com.companio.vr.CameraActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_camera"
+            android:theme="@style/FullscreenTheme">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
     </application>
 
