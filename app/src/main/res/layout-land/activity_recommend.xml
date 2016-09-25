@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#62cdba"
-    tools:context="com.companio.recommend.RecommendActivity">
+    tools:context="com.companio.recommend.RecommendActivity"
+    android:id="@+id/rec_root">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
