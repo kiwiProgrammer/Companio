@@ -124,14 +124,14 @@ public class RecommendActivity extends AppCompatActivity {
 
         final Activity me = this;
         final FrameLayout layout = (FrameLayout) findViewById(R.id.rec_root);
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.recommend);
 
         ViewTreeObserver vto = layout.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-
-
+                mp.start();
             }
         });
     }
