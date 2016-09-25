@@ -86,7 +86,7 @@ public class CameraActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_camera);
         mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.surfaceview);
         mRenderer = new AugmentedRealityRenderer(this);
         setupRenderer();
@@ -119,17 +119,17 @@ public class CameraActivity extends Activity {
                     try {
                         setTangoListeners();
                     } catch (TangoErrorException e) {
-                        Log.e(TAG, getString(R.string.exception_tango_error), e);
+//                        Log.e(TAG, getString(R.string.exception_tango_error), e);
                     } catch (SecurityException e) {
-                        Log.e(TAG, getString(R.string.permission_camera), e);
+//                        Log.e(TAG, getString(R.string.permission_camera), e);
                     }
                     try {
                         mTango.connect(mConfig);
                         mIsConnected = true;
                     } catch (TangoOutOfDateException e) {
-                        Log.e(TAG, getString(R.string.exception_out_of_date), e);
+//                        Log.e(TAG, getString(R.string.exception_out_of_date), e);
                     } catch (TangoErrorException e) {
-                        Log.e(TAG, getString(R.string.exception_tango_error), e);
+//                        Log.e(TAG, getString(R.string.exception_tango_error), e);
                     }
                 }
 
@@ -164,7 +164,7 @@ public class CameraActivity extends Activity {
                 mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
                 mTango.disconnect();
             } catch (TangoErrorException e) {
-                Log.e(TAG, getString(R.string.exception_tango_error), e);
+//                Log.e(TAG, getString(R.string.exception_tango_error), e);
             }
         }
     }

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.projecttango.examples.java.augmentedreality;
+package com.companio.vr;
 
+import com.example.kiwi.companio.R;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;
 import com.google.atap.tangoservice.TangoPoseData;
 
@@ -94,12 +95,12 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         // Create sphere with moon texture.
 
         Material moonMaterial = new Material();
-        try {
-            Texture t = new Texture("moon", R.drawable.moon);
-            moonMaterial.addTexture(t);
-        } catch (ATexture.TextureException e) {
-            Log.e(TAG, "Exception generating moon texture", e);
-        }
+//        try {
+//            Texture t = new Texture("moon", R.drawable.moon);
+//            moonMaterial.addTexture(t);
+//        } catch (ATexture.TextureException e) {
+//            Log.e(TAG, "Exception generating moon texture", e);
+//        }
         moonMaterial.setColorInfluence(0);
         moonMaterial.enableLighting(true);
         moonMaterial.setDiffuseMethod(new DiffuseMethod.Lambert());
@@ -131,7 +132,7 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         // Object3D[] arrowSet = {arrowhead, floorCircle};
         // moveMarker(arrowSet, new Vector3(0, 0, -3), new Vector3(5, 0, -3));
     }
-    
+
     protected void renderObjects (float xPos, float zPos) {
         // Add a directional light in an arbitrary direction.
         DirectionalLight light = new DirectionalLight(1, 0.2, -1);
@@ -146,7 +147,7 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         try {
             Texture t = new Texture("arrow", R.drawable.arrow);
             earthMaterial.addTexture(t);
-            arrowheadMaterial.addTexture(t);        
+            arrowheadMaterial.addTexture(t);
         } catch (ATexture.TextureException e) {
             Log.e(TAG, "Exception generating earth texture", e);
         }
