@@ -51,7 +51,8 @@
         android:elevation="0dp"
         android:layout_gravity="right|center_vertical"
         android:layout_marginTop="100dp"
-        android:layout_marginRight="25dp" />
+        android:layout_marginRight="25dp"
+        android:padding="22dp" />
 
     <Button
         android:text="Get Directions"
@@ -61,7 +62,8 @@
         android:elevation="0dp"
         android:layout_gravity="right|center_vertical"
         android:layout_marginTop="100dp"
-        android:layout_marginRight="163dp" />
+        android:layout_marginRight="163dp"
+        android:background="@android:color/holo_orange_dark" />
 
     <ImageView
         android:layout_width="479dp"
