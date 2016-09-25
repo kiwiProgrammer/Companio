@@ -169,7 +169,6 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
 
 
-        stt.play("k");
     }
 
     /**

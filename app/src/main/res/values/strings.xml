@@ -10,4 +10,7 @@
     <string name="title_activity_camera">CameraActivity</string>
 
     <string name="title_activity_greeting">GreetingActivity</string>
+    <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="title_activity_splash_activity">splash_activity</string>
 </resources>
