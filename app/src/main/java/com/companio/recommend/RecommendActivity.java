@@ -1,12 +1,16 @@
 package com.companio.recommend;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.media.MediaPlayer;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 
 import com.example.kiwi.companio.R;
 
@@ -115,6 +119,19 @@ public class RecommendActivity extends AppCompatActivity {
                 // TODO: Add change to next screen here
                 System.out.println("Hi");
                 return false;
+            }
+        });
+
+        final Activity me = this;
+        final FrameLayout layout = (FrameLayout) findViewById(R.id.rec_root);
+
+        ViewTreeObserver vto = layout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+
+
             }
         });
     }
