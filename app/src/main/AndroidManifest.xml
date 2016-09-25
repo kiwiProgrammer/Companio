@@ -25,12 +25,7 @@
             android:name="com.companio.recommend.RecommendActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_recommend"
-            android:theme="@style/FullscreenTheme" />
-        <activity
-            android:name="com.companio.splash.SplashActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_splash"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,10 +33,17 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.companio.splash.SplashActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/FullscreenTheme">
+        </activity>
+        <activity
             android:name="com.companio.greet.GreetingActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_greeting"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme">
+        </activity>
     </application>
 
 </manifest>
