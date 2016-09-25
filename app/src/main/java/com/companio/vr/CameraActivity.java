@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.projecttango.examples.java.augmentedreality;
+package com.companio.vr;
 
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
@@ -65,7 +65,7 @@ import com.projecttango.tangosupport.TangoSupport;
  * Rajawali, see java_hello_video_example.
  */
 public class CameraActivity extends Activity {
-    private static final String TAG = AugmentedRealityActivity.class.getSimpleName();
+    private static final String TAG = CameraActivity.class.getSimpleName();
     private static final int INVALID_TEXTURE_ID = 0;
 
     private RajawaliSurfaceView mSurfaceView;
@@ -102,8 +102,8 @@ public class CameraActivity extends Activity {
         // Initialize Tango Service as a normal Android Service, since we call
         // mTango.disconnect() in onPause, this will unbind Tango Service, so
         // everytime when onResume get called, we should create a new Tango object.
-        mTango = new Tango(AugmentedRealityActivity.this, new Runnable() {
-            // Pass in a Runnable to be called from UI thread when Tango is ready,
+        mTango = new Tango(CameraActivity.this, new Runnable() {
+            // Pass in a Runnable to be called from UI thread when Tanog is ready,
             // this Runnable will be running on a new thread.
             // When Tango is ready, we can call Tango functions safely here only
             // when there is no UI thread changes involved.
@@ -111,7 +111,7 @@ public class CameraActivity extends Activity {
             public void run() {
                 // Synchronize against disconnecting while the service is being used in the OpenGL
                 // thread or in the UI thread.
-                synchronized (AugmentedRealityActivity.this) {
+                synchronized (CameraActivity.this) {
                     TangoSupport.initialize();
                     mConfig = setupTangoConfig(mTango);
 
@@ -135,7 +135,7 @@ public class CameraActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        synchronized (AugmentedRealityActivity.this) {
+                        synchronized (CameraActivity.this) {
                             mIntrinsics = mTango.getCameraIntrinsics(
                                     TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
                         }
@@ -261,7 +261,7 @@ public class CameraActivity extends Activity {
                 // Prevent concurrent access to {@code mIsFrameAvailableTangoThread} from the Tango
                 // callback thread and service disconnection from an onPause event.
                 try {
-                    synchronized (AugmentedRealityActivity.this) {
+                    synchronized (CameraActivity.this) {
                         // Don't execute any tango API actions if we're not connected to the service
                         if (!mIsConnected) {
                             return;
