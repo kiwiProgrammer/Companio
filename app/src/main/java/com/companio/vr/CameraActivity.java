@@ -44,12 +44,37 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
 import com.projecttango.tangosupport.TangoSupport;
 
+import android.app.Activity;
+import android.media.MediaPlayer;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Surface;
+
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.surface.RajawaliSurfaceView;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.projecttango.tangosupport.TangoSupport;
+import android.annotation.SuppressLint;
+import android.support.annotation.UiThread;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.companio.speech.CompanioSpeechToText;
+import com.companio.speech.OnMessageCallback;
+import com.example.kiwi.companio.R;
+
+import org.w3c.dom.Text;
 /**
  * This is a simple example that shows how to use the Tango APIs to create an augmented reality (AR)
  * application. It displays the Planet Earth floating in space one meter in front of the device, and
@@ -98,31 +123,22 @@ public class CameraActivity extends Activity implements OnMessageCallback {
         mRenderer = new AugmentedRealityRenderer(this);
         setupRenderer();
 
-
         Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
         ImageView iv = (ImageView) this.findViewById(R.id.arrow);
         iv.startAnimation(animation1);
 
-        Thread thread = new Thread() {
+        final Activity me = this;
+        final RelativeLayout layout = (RelativeLayout) findViewById(R.id.camera_root);
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.move);
+
+        ViewTreeObserver vto = layout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        RelativeLayout controls = (RelativeLayout) findViewById(R.id.controls);
-                        controls.setVisibility(View.VISIBLE);
-                    }
-                });
+            public void onGlobalLayout() {
+                layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mp.start();
             }
-        };
-        thread.start();
-
+        });
     }
 
     @Override

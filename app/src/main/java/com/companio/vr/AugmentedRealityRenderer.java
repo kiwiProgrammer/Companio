@@ -91,7 +91,7 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         }
         getCurrentScene().addChildAt(backgroundQuad, 0);
 
-        renderObjects(0, 8);
+        renderObjects(-2,-35);
         // Create sphere with moon texture.
 
         Material moonMaterial = new Material();
@@ -133,7 +133,7 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         // moveMarker(arrowSet, new Vector3(0, 0, -3), new Vector3(5, 0, -3));
     }
 
-    protected void renderObjects (float xPos, float zPos) {
+    public void renderObjects (float xPos, float zPos) {
         // Add a directional light in an arbitrary direction.
         DirectionalLight light = new DirectionalLight(1, 0.2, -1);
         light.setColor(1, 1, 1);
