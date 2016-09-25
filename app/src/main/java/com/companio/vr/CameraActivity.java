@@ -16,6 +16,7 @@
 
 package com.companio.vr;
 
+import com.example.kiwi.companio.R;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
 import com.google.atap.tangoservice.TangoCameraIntrinsics;

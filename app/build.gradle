@@ -32,4 +32,5 @@ dependencies {
     compile(name: 'tango-ux-support-library', ext: 'aar')
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.android.support:support-v4:24.2.0'
+    compile 'org.rajawali3d:rajawali:1.0.325@aar'
 }
