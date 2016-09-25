@@ -55,7 +55,7 @@
         android:id="@+id/textView"
         android:textAlignment="center"
         android:textSize="28sp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:allowUndo="false"
         android:alpha="0.5"
         android:layout_centerVertical="true"

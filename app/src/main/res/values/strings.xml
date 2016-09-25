@@ -14,5 +14,5 @@
     <string name="title_activity_splash_activity">splash_activity</string>
     <string name="title_activity_greeting">GreetingActivity</string>
 
-    <string name="title_activity_greeting_message">Welcome, Mr. Cheah Kit Weng! I have your flight information ready! What would you like to do?</string>
+    <string name="title_activity_greeting_message">Welcome, Mr. Cheah Kit Weng! I have your flight information all ready! What would you like to do?</string>
 </resources>

@@ -29,12 +29,24 @@ public class LoginActivity extends AppCompatActivity {
 
         ImageButton facebook = (ImageButton) this.findViewById(R.id.facebook);
         ImageButton google = (ImageButton) this.findViewById(R.id.google);
+        Button register = (Button) this.findViewById(R.id.register);
         Button login = (Button) this.findViewById(R.id.login);
 
         facebook.setOnClickListener(click_listener);
         google.setOnClickListener(click_listener);
         login.setOnClickListener(click_listener);
+        register.setOnClickListener(register_listener);
     }
+
+    private View.OnClickListener register_listener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+
+            Intent intent = new Intent(getApplicationContext(), com.companio.vr.CameraActivity.class);
+            startActivity(intent);
+        }
+    };
 
     private View.OnClickListener click_listener = new View.OnClickListener() {
 

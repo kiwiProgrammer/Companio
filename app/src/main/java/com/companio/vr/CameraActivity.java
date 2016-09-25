@@ -16,7 +16,20 @@
 
 package com.companio.vr;
 
+import android.app.Activity;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Surface;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+
 import com.companio.speech.CompanioSpeechToText;
+import com.companio.speech.OnMessageCallback;
 import com.example.kiwi.companio.R;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
@@ -29,36 +42,13 @@ import com.google.atap.tangoservice.TangoOutOfDateException;
 import com.google.atap.tangoservice.TangoPointCloudData;
 import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
-
-import android.app.Activity;
-import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Surface;
+import com.projecttango.tangosupport.TangoSupport;
 
 import org.rajawali3d.scene.ASceneFrameCallback;
 import org.rajawali3d.surface.RajawaliSurfaceView;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.projecttango.tangosupport.TangoSupport;
-import android.annotation.SuppressLint;
-import android.support.annotation.UiThread;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.TextView;
-
-import com.companio.speech.CompanioSpeechToText;
-import com.companio.speech.OnMessageCallback;
-import com.example.kiwi.companio.R;
-
-import org.w3c.dom.Text;
 
 /**
  * This is a simple example that shows how to use the Tango APIs to create an augmented reality (AR)
@@ -107,6 +97,32 @@ public class CameraActivity extends Activity implements OnMessageCallback {
         mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.surfaceview);
         mRenderer = new AugmentedRealityRenderer(this);
         setupRenderer();
+
+
+        Animation animation1 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+        ImageView iv = (ImageView) this.findViewById(R.id.arrow);
+        iv.startAnimation(animation1);
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        RelativeLayout controls = (RelativeLayout) findViewById(R.id.controls);
+                        controls.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        };
+        thread.start();
+
     }
 
     @Override
