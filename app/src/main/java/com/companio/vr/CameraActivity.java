@@ -1,165 +1,376 @@
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.companio.vr;
 
-import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
+import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
+import com.google.atap.tangoservice.TangoCameraIntrinsics;
+import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoCoordinateFramePair;
+import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoEvent;
+import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPointCloudData;
+import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.TangoXyzIjData;
 
-import com.example.kiwi.companio.R;
+import android.app.Activity;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Surface;
+
+import org.rajawali3d.scene.ASceneFrameCallback;
+import org.rajawali3d.surface.RajawaliSurfaceView;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.projecttango.tangosupport.TangoSupport;
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * This is a simple example that shows how to use the Tango APIs to create an augmented reality (AR)
+ * application. It displays the Planet Earth floating in space one meter in front of the device, and
+ * the Moon rotating around it.
+ * <p/>
+ * This example uses Rajawali for the OpenGL rendering. This includes the color camera image in the
+ * background and a 3D sphere with a texture of the Earth floating in space three meter forward.
+ * This part is implemented in the {@code AugmentedRealityRenderer} class, like a regular Rajawali
+ * application.
+ * <p/>
+ * This example focuses on how to use the Tango APIs to get the color camera data into an OpenGL
+ * texture efficiently and have the OpenGL camera track the movement of the device in order to
+ * achieve an augmented reality effect.
+ * <p/>
+ * Note that it is important to include the KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION configuration
+ * parameter in order to achieve best results synchronizing the Rajawali virtual world with the
+ * RGB camera.
+ * <p/>
+ * If you're looking for a more stripped down example that doesn't use a rendering library like
+ * Rajawali, see java_hello_video_example.
  */
-public class CameraActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+public class CameraActivity extends Activity {
+    private static final String TAG = CameraActivity.class.getSimpleName();
+    private static final int INVALID_TEXTURE_ID = 0;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private RajawaliSurfaceView mSurfaceView;
+    private AugmentedRealityRenderer mRenderer;
+    private TangoCameraIntrinsics mIntrinsics;
+    private Tango mTango;
+    private TangoConfig mConfig;
+    private boolean mIsConnected = false;
+    private double mCameraPoseTimestamp = 0;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
+    // Texture rendering related fields.
+    // NOTE: Naming indicates which thread is in charge of updating this variable.
+    private int mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
+    private AtomicBoolean mIsFrameAvailableTangoThread = new AtomicBoolean(false);
+    private double mRgbTimestampGlThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_camera);
-
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
-
-
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        setContentView(R.layout.activity_main);
+        mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.surfaceview);
+        mRenderer = new AugmentedRealityRenderer(this);
+        setupRenderer();
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    protected void onResume() {
+        super.onResume();
+        mSurfaceView.onResume();
+        // Set render mode to RENDERMODE_CONTINUOUSLY to force getting onDraw callbacks until the
+        // Tango service is properly set-up and we start getting onFrameAvailable callbacks.
+        mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+        // Initialize Tango Service as a normal Android Service, since we call
+        // mTango.disconnect() in onPause, this will unbind Tango Service, so
+        // everytime when onResume get called, we should create a new Tango object.
+        mTango = new Tango(CameraActivity.this, new Runnable() {
+            // Pass in a Runnable to be called from UI thread when Tanog is ready,
+            // this Runnable will be running on a new thread.
+            // When Tango is ready, we can call Tango functions safely here only
+            // when there is no UI thread changes involved.
+            @Override
+            public void run() {
+                // Synchronize against disconnecting while the service is being used in the OpenGL
+                // thread or in the UI thread.
+                synchronized (CameraActivity.this) {
+                    TangoSupport.initialize();
+                    mConfig = setupTangoConfig(mTango);
+
+                    try {
+                        setTangoListeners();
+                    } catch (TangoErrorException e) {
+                        Log.e(TAG, getString(R.string.exception_tango_error), e);
+                    } catch (SecurityException e) {
+                        Log.e(TAG, getString(R.string.permission_camera), e);
+                    }
+                    try {
+                        mTango.connect(mConfig);
+                        mIsConnected = true;
+                    } catch (TangoOutOfDateException e) {
+                        Log.e(TAG, getString(R.string.exception_out_of_date), e);
+                    } catch (TangoErrorException e) {
+                        Log.e(TAG, getString(R.string.exception_tango_error), e);
+                    }
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (CameraActivity.this) {
+                            mIntrinsics = mTango.getCameraIntrinsics(
+                                    TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                        }
+                    }
+                });
+            }
+        });
     }
 
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSurfaceView.onPause();
+        // Synchronize against disconnecting while the service is being used in the OpenGL thread or
+        // in the UI thread.
+        // NOTE: DO NOT lock against this same object in the Tango callback thread. Tango.disconnect
+        // will block here until all Tango callback calls are finished. If you lock against this
+        // object in a Tango callback thread it will cause a deadlock.
+        synchronized (this) {
+            try {
+                mIsConnected = false;
+                mTango.disconnectCamera(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                // We need to invalidate the connected texture ID so that we cause a re-connection
+                // in the OpenGL thread after resume.
+                mConnectedTextureIdGlThread = INVALID_TEXTURE_ID;
+                mTango.disconnect();
+            } catch (TangoErrorException e) {
+                Log.e(TAG, getString(R.string.exception_tango_error), e);
+            }
         }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
     /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
+     * Sets up the tango configuration object. Make sure mTango object is initialized before
+     * making this call.
      */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    private TangoConfig setupTangoConfig(Tango tango) {
+        // Use default configuration for Tango Service, plus color camera and
+        // low latency IMU integration.
+        TangoConfig config = tango.getConfig(TangoConfig.CONFIG_TYPE_DEFAULT);
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_COLORCAMERA, true);
+
+        // NOTE: Low latency integration is necessary to achieve a precise alignment of
+        // virtual objects with the RBG image and produce a good AR effect.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_LOWLATENCYIMUINTEGRATION, true);
+
+        // Drift correction allows motion tracking to recover after it loses tracking.
+        //
+        // The drift corrected pose is is available through the frame pair with
+        // base frame AREA_DESCRIPTION and target frame DEVICE.
+        config.putBoolean(TangoConfig.KEY_BOOLEAN_DRIFT_CORRECTION, true);
+        return config;
+    }
+
+    /**
+     * Set up the callback listeners for the Tango service, then begin using the Motion
+     * Tracking API. This is called in response to the user clicking the 'Start' Button.
+     */
+    private void setTangoListeners() {
+        // No need to add any coordinate frame pairs since we aren't using pose data from callbacks.
+        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+
+        mTango.connectListener(framePairs, new OnTangoUpdateListener() {
+            @Override
+            public void onPoseAvailable(TangoPoseData pose) {
+                // We are not using onPoseAvailable for this app.
+            }
+
+            @Override
+            public void onXyzIjAvailable(TangoXyzIjData xyzIj) {
+                // We are not using onXyzIjAvailable for this app.
+            }
+
+            @Override
+            public void onPointCloudAvailable(TangoPointCloudData pointCloud) {
+                // We are not using onPointCloudAvailable for this app.
+            }
+
+            @Override
+            public void onTangoEvent(TangoEvent event) {
+                // We are not using onTangoEvent for this app.
+            }
+
+            @Override
+            public void onFrameAvailable(int cameraId) {
+                // Check if the frame available is for the camera we want and update its frame
+                // on the view.
+                if (cameraId == TangoCameraIntrinsics.TANGO_CAMERA_COLOR) {
+                    // Now that we are receiving onFrameAvailable callbacks, we can switch
+                    // to RENDERMODE_WHEN_DIRTY to drive the render loop from this callback.
+                    // This will result on a frame rate of  approximately 30FPS, in synchrony with
+                    // the RGB camera driver.
+                    // If you need to render at a higher rate (i.e.: if you want to render complex
+                    // animations smoothly) you  can use RENDERMODE_CONTINUOUSLY throughout the
+                    // application lifecycle.
+                    if (mSurfaceView.getRenderMode() != GLSurfaceView.RENDERMODE_WHEN_DIRTY) {
+                        mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                    }
+
+                    // Mark a camera frame is available for rendering in the OpenGL thread.
+                    mIsFrameAvailableTangoThread.set(true);
+                    // Trigger an Rajawali render to update the scene with the new RGB data.
+                    mSurfaceView.requestRender();
+                }
+            }
+        });
+    }
+
+    /**
+     * Connects the view and renderer to the color camara and callbacks.
+     */
+    private void setupRenderer() {
+        // Register a Rajawali Scene Frame Callback to update the scene camera pose whenever a new
+        // RGB frame is rendered.
+        // (@see https://github.com/Rajawali/Rajawali/wiki/Scene-Frame-Callbacks)
+        mRenderer.getCurrentScene().registerFrameCallback(new ASceneFrameCallback() {
+            @Override
+            public void onPreFrame(long sceneTime, double deltaTime) {
+                // NOTE: This is called from the OpenGL render thread, after all the renderer
+                // onRender callbacks had a chance to run and before scene objects are rendered
+                // into the scene.
+
+                // Prevent concurrent access to {@code mIsFrameAvailableTangoThread} from the Tango
+                // callback thread and service disconnection from an onPause event.
+                try {
+                    synchronized (CameraActivity.this) {
+                        // Don't execute any tango API actions if we're not connected to the service
+                        if (!mIsConnected) {
+                            return;
+                        }
+
+                        // Set-up scene camera projection to match RGB camera intrinsics.
+                        if (!mRenderer.isSceneCameraConfigured()) {
+                            mRenderer.setProjectionMatrix(
+                                    projectionMatrixFromCameraIntrinsics(mIntrinsics));
+                        }
+                        // Connect the camera texture to the OpenGL Texture if necessary
+                        // NOTE: When the OpenGL context is recycled, Rajawali may re-generate the
+                        // texture with a different ID.
+                        if (mConnectedTextureIdGlThread != mRenderer.getTextureId()) {
+                            mTango.connectTextureId(TangoCameraIntrinsics.TANGO_CAMERA_COLOR,
+                                    mRenderer.getTextureId());
+                            mConnectedTextureIdGlThread = mRenderer.getTextureId();
+                            Log.d(TAG, "connected to texture id: " + mRenderer.getTextureId());
+                        }
+
+                        // If there is a new RGB camera frame available, update the texture with it
+                        if (mIsFrameAvailableTangoThread.compareAndSet(true, false)) {
+                            mRgbTimestampGlThread =
+                                    mTango.updateTexture(TangoCameraIntrinsics.TANGO_CAMERA_COLOR);
+                        }
+
+                        // If a new RGB frame has been rendered, update the camera pose to match.
+                        if (mRgbTimestampGlThread > mCameraPoseTimestamp) {
+                            // Calculate the camera color pose at the camera frame update time in
+                            // OpenGL engine.
+                            //
+                            // When drift correction mode is enabled in config file, we must query
+                            // the device with respect to Area Description pose in order to use the
+                            // drift corrected pose.
+                            //
+                            // Note that if you don't want to use the drift corrected pose, the
+                            // normal device with respect to start of service pose is available.
+                            TangoPoseData lastFramePose = TangoSupport.getPoseAtTime(
+                                    mRgbTimestampGlThread,
+                                    TangoPoseData.COORDINATE_FRAME_AREA_DESCRIPTION,
+                                    TangoPoseData.COORDINATE_FRAME_CAMERA_COLOR,
+                                    TangoSupport.TANGO_SUPPORT_ENGINE_OPENGL,
+                                    Surface.ROTATION_0);
+                            if (lastFramePose.statusCode == TangoPoseData.POSE_VALID) {
+                                // Update the camera pose from the renderer
+                                mRenderer.updateRenderCameraPose(lastFramePose);
+                                mCameraPoseTimestamp = lastFramePose.timestamp;
+                            } else {
+                                // When the pose status is not valid, it indicates the tracking has
+                                // been lost. In this case, we simply stop rendering.
+                                //
+                                // This is also the place to display UI to suggest the user walk
+                                // to recover tracking.
+                                Log.w(TAG, "Can't get device pose at time: " +
+                                        mRgbTimestampGlThread);
+                            }
+                        }
+                    }
+
+                    // Avoid crashing the application due to unhandled exceptions
+                } catch (TangoErrorException e) {
+                    Log.e(TAG, "Tango API call error within the OpenGL render thread", e);
+                } catch (Throwable t) {
+                    Log.e(TAG, "Exception on the OpenGL thread", t);
+                }
+            }
+
+            @Override
+            public void onPreDraw(long sceneTime, double deltaTime) {
+
+            }
+
+            @Override
+            public void onPostFrame(long sceneTime, double deltaTime) {
+
+            }
+
+            @Override
+            public boolean callPreFrame() {
+                return true;
+            }
+        });
+
+        mSurfaceView.setSurfaceRenderer(mRenderer);
+    }
+
+    /**
+     * Use Tango camera intrinsics to calculate the projection Matrix for the Rajawali scene.
+     */
+    private static float[] projectionMatrixFromCameraIntrinsics(TangoCameraIntrinsics intrinsics) {
+        // Uses frustumM to create a projection matrix taking into account calibrated camera
+        // intrinsic parameter.
+        // Reference: http://ksimek.github.io/2013/06/03/calibrated_cameras_in_opengl/
+        float near = 0.1f;
+        float far = 100;
+
+        float xScale = near / (float) intrinsics.fx;
+        float yScale = near / (float) intrinsics.fy;
+        float xOffset = (float) (intrinsics.cx - (intrinsics.width / 2.0)) * xScale;
+        // Color camera's coordinates has y pointing downwards so we negate this term.
+        float yOffset = (float) -(intrinsics.cy - (intrinsics.height / 2.0)) * yScale;
+
+        float m[] = new float[16];
+        Matrix.frustumM(m, 0,
+                xScale * (float) -intrinsics.width / 2.0f - xOffset,
+                xScale * (float) intrinsics.width / 2.0f - xOffset,
+                yScale * (float) -intrinsics.height / 2.0f - yOffset,
+                yScale * (float) intrinsics.height / 2.0f - yOffset,
+                near, far);
+        return m;
     }
 }
