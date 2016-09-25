@@ -53,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            Intent intent = new Intent(getApplicationContext(), com.companio.greet.GreetingActivity.class);
+            Intent intent = new Intent(getApplicationContext(), com.companio.scanner.ScannerActivity.class);
             startActivity(intent);
 
         }

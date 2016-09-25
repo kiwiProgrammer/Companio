@@ -49,6 +49,13 @@
             android:label="@string/title_activity_camera"
             android:theme="@style/FullscreenTheme">
         </activity>
+
+        <activity
+            android:name="com.companio.scanner.ScannerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_greeting"
+            android:theme="@style/FullscreenTheme">
+        </activity>
     </application>
 
 </manifest>
