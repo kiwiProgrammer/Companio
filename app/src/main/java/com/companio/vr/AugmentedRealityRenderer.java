@@ -91,7 +91,7 @@ public class AugmentedRealityRenderer extends RajawaliRenderer {
         }
         getCurrentScene().addChildAt(backgroundQuad, 0);
 
-        renderObjects(6, 0);
+        renderObjects(0, 8);
         // Create sphere with moon texture.
 
         Material moonMaterial = new Material();
