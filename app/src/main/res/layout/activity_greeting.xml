@@ -1,8 +1,9 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="#fff"
     tools:context="com.companio.greet.GreetingActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -15,9 +16,9 @@
         android:gravity="center"
         android:keepScreenOn="true"
         android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
+        android:textColor="#fff"
         android:textSize="50sp"
-        android:textStyle="bold" />
+        android:textStyle="normal" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -45,6 +46,14 @@
                 android:text="@string/dummy_button" />
 
         </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/departure"
+            android:id="@+id/imageView"
+            android:scaleType="fitXY" />
+
     </FrameLayout>
 
-</FrameLayout>
+</RelativeLayout>
