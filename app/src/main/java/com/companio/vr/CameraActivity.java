@@ -16,6 +16,7 @@
 
 package com.companio.vr;
 
+import com.companio.speech.CompanioSpeechToText;
 import com.example.kiwi.companio.R;
 import com.google.atap.tangoservice.Tango;
 import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
@@ -43,6 +44,21 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.projecttango.tangosupport.TangoSupport;
+import android.annotation.SuppressLint;
+import android.support.annotation.UiThread;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TextView;
+
+import com.companio.speech.CompanioSpeechToText;
+import com.companio.speech.OnMessageCallback;
+import com.example.kiwi.companio.R;
+
+import org.w3c.dom.Text;
 
 /**
  * This is a simple example that shows how to use the Tango APIs to create an augmented reality (AR)
@@ -65,9 +81,10 @@ import com.projecttango.tangosupport.TangoSupport;
  * If you're looking for a more stripped down example that doesn't use a rendering library like
  * Rajawali, see java_hello_video_example.
  */
-public class CameraActivity extends Activity {
+public class CameraActivity extends Activity implements OnMessageCallback {
     private static final String TAG = CameraActivity.class.getSimpleName();
     private static final int INVALID_TEXTURE_ID = 0;
+    CompanioSpeechToText stt;
 
     private RajawaliSurfaceView mSurfaceView;
     private AugmentedRealityRenderer mRenderer;
@@ -144,6 +161,14 @@ public class CameraActivity extends Activity {
                 });
             }
         });
+
+        // Upon interacting with UI controls, delay any scheduled hide()
+        // operations to prevent the jarring behavior of controls going away
+        // while interacting with the UI.
+        //findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+
+        //stt= new CompanioSpeechToText(this, this);
+        //stt.start();
     }
 
     @Override
@@ -267,7 +292,6 @@ public class CameraActivity extends Activity {
                         if (!mIsConnected) {
                             return;
                         }
-
                         // Set-up scene camera projection to match RGB camera intrinsics.
                         if (!mRenderer.isSceneCameraConfigured()) {
                             mRenderer.setProjectionMatrix(
@@ -373,5 +397,9 @@ public class CameraActivity extends Activity {
                 yScale * (float) intrinsics.height / 2.0f - yOffset,
                 near, far);
         return m;
+    }
+
+    @Override
+    public void onMessage(final String s) {
     }
 }

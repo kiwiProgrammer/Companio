@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kiwi.companio">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-feature android:name="android.hardware.camera" />
 
     <application
@@ -11,7 +12,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/FullscreenTheme">
+        android:theme="@style/FullscreenTheme"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:replace="android:theme">
+
         <activity
             android:name="com.companio.login.LoginActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -21,24 +25,23 @@
             android:name="com.companio.recommend.RecommendActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_recommend"
-            android:theme="@style/FullscreenTheme" />
-        <activity
-            android:name="com.companio.vr.CameraActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_recommend"
             android:theme="@style/FullscreenTheme" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.companio.splash.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_splash"
             android:theme="@style/FullscreenTheme">
-
+        </activity>
+        <activity
+            android:name="com.companio.greet.GreetingActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_greeting"
+            android:theme="@style/FullscreenTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
