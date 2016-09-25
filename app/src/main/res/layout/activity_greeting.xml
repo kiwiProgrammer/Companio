@@ -52,8 +52,30 @@
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/departure"
             android:id="@+id/imageView"
-            android:scaleType="fitXY" />
+            android:scaleType="fitXY"
+            android:alpha="0.7" />
 
     </FrameLayout>
+
+    <ImageView
+        android:layout_width="239dp"
+        android:layout_height="426dp"
+        app:srcCompat="@drawable/robot4"
+        android:id="@+id/imageView2"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView"
+        tools:text="@string/title_activity_greeting_message"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textColor="@android:color/background_light"
+        android:allowUndo="false"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>
