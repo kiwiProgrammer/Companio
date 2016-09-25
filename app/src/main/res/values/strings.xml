@@ -8,4 +8,6 @@
     <string name="title_activity_recommend">RecommendActivity</string>
 
     <string name="title_activity_camera">CameraActivity</string>
+
+    <string name="title_activity_greeting">GreetingActivity</string>
 </resources>

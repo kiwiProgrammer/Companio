@@ -1,29 +1,20 @@
-package com.companio.vr;
+package com.companio.greet;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.UiThread;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.app.ActionBar;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 
-import com.companio.speech.CompanioSpeechToText;
-import com.companio.speech.OnMessageCallback;
 import com.example.kiwi.companio.R;
-
-import org.w3c.dom.Text;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class CameraActivity extends AppCompatActivity implements OnMessageCallback {
-    CompanioSpeechToText stt;
-
-
+public class GreetingActivity extends Activity {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -43,7 +34,6 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
-    private TextView cameraText;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -66,7 +56,7 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
         @Override
         public void run() {
             // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
+            ActionBar actionBar = getActionBar();
             if (actionBar != null) {
                 actionBar.show();
             }
@@ -89,7 +79,6 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             if (AUTO_HIDE) {
-
                 delayedHide(AUTO_HIDE_DELAY_MILLIS);
             }
             return false;
@@ -100,12 +89,11 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.activity_greeting);
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
-        cameraText = (TextView) mContentView;
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -120,9 +108,6 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-
-        stt= new CompanioSpeechToText(this, this);
-        stt.start();
     }
 
     @Override
@@ -145,7 +130,7 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
 
     private void hide() {
         // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
@@ -167,9 +152,6 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-
-
-        stt.play("k");
     }
 
     /**
@@ -179,16 +161,5 @@ public class CameraActivity extends AppCompatActivity implements OnMessageCallba
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
-    }
-
-    @Override
-    public void onMessage(final String s) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                cameraText.setText(s);
-
-            }
-        });
     }
 }
