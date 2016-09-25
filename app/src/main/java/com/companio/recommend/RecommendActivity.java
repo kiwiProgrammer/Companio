@@ -2,6 +2,7 @@ package com.companio.recommend;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import com.companio.vr.CameraActivity;
 import com.example.kiwi.companio.R;
 
 /**
@@ -95,6 +97,10 @@ public class RecommendActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_recommend);
 
+        final Activity me = this;
+        final FrameLayout layout = (FrameLayout) findViewById(R.id.rec_root);
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.recommend);
+
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
@@ -116,24 +122,27 @@ public class RecommendActivity extends AppCompatActivity {
         findViewById(R.id.fullscreen_btn).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                // TODO: Add change to next screen here
-                System.out.println("Hi");
+
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    System.out.println("Hi");
+                    Intent intent = new Intent(me.getApplicationContext(), CameraActivity.class);
+                    startActivity(intent);
+                }
                 return false;
             }
         });
 
-        final Activity me = this;
-        final FrameLayout layout = (FrameLayout) findViewById(R.id.rec_root);
-        final MediaPlayer mp = MediaPlayer.create(this, R.raw.recommend);
 
-        ViewTreeObserver vto = layout.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                mp.start();
-            }
-        });
+        if (layout != null) {
+            ViewTreeObserver vto = layout.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    mp.start();
+                }
+            });
+        }
     }
 
     @Override

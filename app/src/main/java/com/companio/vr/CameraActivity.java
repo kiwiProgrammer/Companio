@@ -31,6 +31,7 @@ import com.google.atap.tangoservice.TangoPoseData;
 import com.google.atap.tangoservice.TangoXyzIjData;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -52,6 +53,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.companio.speech.CompanioSpeechToText;
@@ -107,6 +110,19 @@ public class CameraActivity extends Activity implements OnMessageCallback {
         mSurfaceView = (RajawaliSurfaceView) findViewById(R.id.surfaceview);
         mRenderer = new AugmentedRealityRenderer(this);
         setupRenderer();
+
+        final Activity me = this;
+        final RelativeLayout layout = (RelativeLayout) findViewById(R.id.camera_root);
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.move);
+
+        ViewTreeObserver vto = layout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                layout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mp.start();
+            }
+        });
     }
 
     @Override
