@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#62cdba"
-    tools:context="com.companio.greet.GreetingActivity">
+    tools:context="com.companio.greet.GreetingActivity"
+    android:id="@+id/greet_root">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -39,10 +40,11 @@
         android:background="#00000000"/>
 
     <ImageView
-        android:layout_width="239dp"
-        android:layout_height="426dp"
+        android:layout_width="350dp"
+        android:layout_height="500dp"
         app:srcCompat="@drawable/robot4"
         android:id="@+id/imageView2"
+        android:layout_marginLeft="-20dp"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true" />
 
@@ -52,12 +54,17 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView"
         android:textAlignment="center"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textColor="@android:color/black"
         android:allowUndo="false"
         android:alpha="0.5"
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:layout_marginStart="212dp" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fullscreen_greet_btn"
+        android:background="#00000000"/>
 
 </RelativeLayout>
